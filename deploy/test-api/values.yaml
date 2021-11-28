@@ -1,0 +1,125 @@
+# Default values for test-api.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+# helm lint ./test-api
+# helm template --release-name cloud ./test-api
+# helm install testapp ./test-api -n default --dry-run
+# helm install testapp ./test-api -n default
+# http://192.168.10.211:8080/api-docs
+# helm upgrade --install testapp test-api
+# helm uninstall testapp -n default
+
+replicaCount: 1
+
+image:
+  #repository: $ACR_NAME.azurecr.io/testapp
+  repository: hdsoft.azurecr.io/testapp
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+  pullPolicy: Always
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+ports:
+  - name: http
+    containerPort: 8080
+
+# Configure Liveness, Readiness and Startup Probes - https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+# Health Checks Endpoints - https://github.com/nodeshift/nodejs-reference-architecture/blob/main/docs/operations/healthchecks.md#endpoints
+# Define a liveness HTTP request - https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-a-liveness-http-request
+livenessProbe:
+  failureThreshold: 1
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  httpGet:
+    host:
+    scheme: HTTP
+    path: /livez
+    port: http
+
+readinessProbe:
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  httpGet:
+    host:
+    scheme: HTTP
+    path: /readyz
+    port: http
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  #annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  #name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  {}
+  # fsGroup: 2000
+
+securityContext:
+  {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  # Apply a DNS label to the service - https://docs.microsoft.com/en-us/azure/aks/static-ip#apply-a-dns-label-to-the-service
+  # testapp-02eastus2.cloudapp.azure.com
+  # annotations:
+  #   service.beta.kubernetes.io/azure-dns-label-name: testapp-02
+  type: LoadBalancer
+  #type: NodePort
+  # loadBalancerIP: 20.114.222.121
+  port: 8080
+
+ingress:
+  enabled: false
+  className: ""
+  annotations:
+    {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: chart-example.local
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources:
+  {}
+  # We usually recommend not to specify default resources and to leave this as a conscious choice for the user.
+  # This also increases chances charts run on environments with little resources, such as Minikube.
+  # If you do want to specify resources, uncomment the following lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

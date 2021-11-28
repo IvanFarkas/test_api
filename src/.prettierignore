@@ -1,0 +1,5 @@
+*.json
+*.html
+*.yml
+coverage
+build
